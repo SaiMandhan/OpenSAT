@@ -69,6 +69,37 @@ app.get('/get-recommendation', async (req, res) => {
     }
 });
 
+app.post('/update-progress-data', async (req, res) => {
+    try {
+        const userId: any = req.body.userId;
+        const questionId: any = req.body.questionId;
+        const correct: any = req.body.correct;
+
+        if (typeof questionId !== 'string' || questionId === '') {
+            res.status(400).send('Question ID is a required string');
+        } else if (typeof correct !== 'boolean') {
+            res.status(400).send('Correct must be a boolean');
+        }
+
+        // MOCK DATA
+        // TODO: Update with actual Firestore update logic
+        const firestoreRes: FirestoreUtilResponse = {
+            type: 'success',
+            data: {},
+            details: ''
+        };
+
+        if (firestoreRes.type === 'success') {
+            res.status(200).send('Progress updated successfully');
+        } else {
+            res.status(500).send('Error updating data: ' + firestoreRes.details);
+        }
+    } catch (error) {
+        console.log("Error updating progress data: ", error);
+        res.status(500).send('Error updating data');
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
