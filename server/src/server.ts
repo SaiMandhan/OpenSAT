@@ -1,4 +1,4 @@
-import express from 'express';
+import express,{ Request, Response } from 'express';
 import axios from 'axios';
 
 const app = express();
@@ -10,6 +10,41 @@ interface FirestoreUtilResponse {
     details: string,
 }
 
+const mockUsers: { [key: string]: { username: string; password: string } } = {
+    user1: { username: 'user1', password: 'pass123' },
+    user2: { username: 'user2', password: 'pass456' },
+};
+
+interface RegisterRequestBody {
+    username: string;
+    password: string;
+  }
+  
+app.get('/register', async (req: any, res: any) => {
+    try {
+      const username: any = req.query.username;
+      const password: any = req.query.password;
+  
+      if (!username || !password) {
+        return res.status(400).send({ error: 'Username and password are required' });
+      }
+  
+      
+      const isUsernameTaken = Object.values(mockUsers).some((user) => user.username === username);
+  
+      if (isUsernameTaken) {
+        return res.status(400).send({ error: 'Username is already taken' });
+      }
+  
+      const userId = `user${Object.keys(mockUsers).length + 1}`;
+      mockUsers[userId] = { username, password };
+  
+      res.status(201).send({ message: 'Registration successful', userId });
+    } catch (error) {
+      res.status(500).send({ error: 'Internal server error' });
+    }
+});
+  
 app.get('/get-progress-data', async (req, res) => {
     try {
         const userType: any = req.query.userType;
