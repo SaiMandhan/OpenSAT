@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "my-app",
+			"path": "../../client/my-app"
+		},
+		{
+			"name": "server",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"jest.disabledWorkspaceFolders": [
+			"OpenSAT"
+		]
+	}
+}

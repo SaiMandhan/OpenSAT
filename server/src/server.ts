@@ -1,14 +1,9 @@
-import express,{ Request, Response } from 'express';
+import express, { Request, Response } from 'express';
+import { FirestoreUtilResponse } from './utils/FirestoreUtils';
 import axios from 'axios';
 
 const app = express();
 const port = 3000;
-
-interface FirestoreUtilResponse {
-    type: 'success' | 'failure' | 'unauthorized',
-    data: any,
-    details: string,
-}
 
 const mockUsers: { [key: string]: { username: string; password: string } } = {
     user1: { username: 'user1', password: 'pass123' },
