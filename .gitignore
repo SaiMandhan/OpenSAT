@@ -2,3 +2,7 @@
 node_modules/
 tsconfig.json
 dist/
+
+
+# misc
+.env
