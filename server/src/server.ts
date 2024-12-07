@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { FirestoreUtilResponse } from './utils/FirestoreUtils';
+import { FirestoreUtilResponse } from './FirestoreUtils';
 import axios from 'axios';
 
 const app = express();
