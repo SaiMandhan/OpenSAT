@@ -1,42 +1,11 @@
-import {addDoc, getDocs, collection, QuerySnapshot, getFirestore, Firestore} from 'firebase/firestore';
-import { initializeApp } from "firebase/app";
-import * as dotenv from 'dotenv';
-dotenv.config();
+
+import { Firestore } from 'firebase-admin/firestore';
 
 export interface FirestoreUtilResponse {
     type: 'success' | 'failure' | 'unauthorized';
     data: any;
     details: string;
 }
-
-const requiredEnvVars = [
-    'FIREBASE_API_KEY',
-    'FIREBASE_AUTH_DOMAIN',
-    'FIREBASE_PROJECT_ID',
-    'FIREBASE_STORAGE_BUCKET',
-    'FIREBASE_MESSAGING_SENDER_ID',
-    'FIREBASE_APP_ID'
-];
-
-requiredEnvVars.forEach((envVar) => {
-    if (!process.env[envVar]) {
-        throw new Error(`Environment variable ${envVar} is missing`);
-    }
-});
-
-// TODO: add below to app when used
-// const firebaseConfig = {
-//     apiKey: process.env.FIREBASE_API_KEY,
-//     authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-//     projectId: process.env.FIREBASE_PROJECT_ID,
-//     storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-//     messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-//     appId: process.env.FIREBASE_APP_ID
-// };
-
-// // Initialize Firebase
-// const app = initializeApp(firebaseConfig);
-// const db = getFirestore(app);
 
 export class FirestoreUtils {
     firestore: Firestore;
@@ -45,12 +14,20 @@ export class FirestoreUtils {
         this.firestore = db;
     }
 
-    async updateStudentProgress(userId: string, questionId: string, correctAnswer: string, answerChosen: string, correct: boolean): Promise<FirestoreUtilResponse> {
+    async updateStudentProgress(
+        userId: string, 
+        questionId: string, 
+        correctAnswer: string, 
+        answerChosen: string, 
+        correct: boolean
+    ): Promise<FirestoreUtilResponse> {
         try {
-            const userRef = collection(this.firestore, 'users');
-            const questionRef = collection(userRef, userId, 'questions');
-
-            await addDoc(questionRef, {
+            const questionRef = this.firestore
+                .collection('users')
+                .doc(userId)
+                .collection('questions');
+            
+            await questionRef.add({
                 questionId,
                 answered: new Date(),
                 answerChosen,
@@ -74,8 +51,11 @@ export class FirestoreUtils {
 
     async getUserProgress(userId: string): Promise<FirestoreUtilResponse> {
         try {
-            const questionsRef = collection(this.firestore, `users/${userId}/questions`);
-            const questionsSnapshot = await getDocs(questionsRef);
+            const questionsRef = this.firestore
+                .collection('users')
+                .doc(userId)
+                .collection('questions');
+            const questionsSnapshot = await questionsRef.get();
             const questions = questionsSnapshot.docs.map(doc => doc.data());
 
             return {
