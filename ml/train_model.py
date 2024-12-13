@@ -2,14 +2,15 @@ import json
 from transformers import BertTokenizer, BertModel
 import torch
 from sklearn.metrics.pairwise import cosine_similarity
+from tqdm import tqdm
 
 # Load json dataset
-with open("sat_dataset.json", "r") as file:
+with open("sat_dataset.json", "r", encoding='utf-8') as file:
     dataset = json.load(file)
 
 # Reshape data
-# TODO: take out "math" and do it for all questions
 questions = [{"id": item["id"], "text": item["question"]["question"]} for item in dataset["math"]]
+questions += [{"id": item["id"], "text": item["question"]["question"]} for item in dataset["english"]]
 
 # Load pre-trained tokenizer
 tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
@@ -26,7 +27,7 @@ def get_embedding(text):
 
 # Generate embeddings for all questions in the dataset
 question_embeddings = {}
-for question in questions:
+for question in tqdm(questions, desc="Tokenizing questions"):
     question_embeddings[question["id"]] = get_embedding(question["text"])
 
 # Recommendation system using cosine similarity
