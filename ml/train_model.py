@@ -1,4 +1,5 @@
 import json
+import pickle
 from transformers import BertTokenizer, BertModel
 import torch
 from sklearn.metrics.pairwise import cosine_similarity
@@ -29,6 +30,14 @@ def get_embedding(text):
 question_embeddings = {}
 for question in tqdm(questions, desc="Tokenizing questions"):
     question_embeddings[question["id"]] = get_embedding(question["text"])
+
+# Save embeddings to a file
+with open("question_embeddings.pkl", "wb") as f:
+    pickle.dump(question_embeddings, f)
+
+# Load embeddings from a file
+with open("question_embeddings.pkl", "rb") as f:
+    question_embeddings = pickle.load(f)
 
 # Recommendation system using cosine similarity
 def recommend_questions(question_id, top_n=3):
