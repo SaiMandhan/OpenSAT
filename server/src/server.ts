@@ -73,7 +73,7 @@ app.get('/register', async (req: any, res: any) => {
 });
 
 // Get progress data
-// Keeping `req: any, res: any` as before
+
 app.get('/get-progress-data', async (req: any, res: any) => {
   try {
     const userType: any = req.query.userType;
@@ -103,7 +103,7 @@ app.get('/get-progress-data', async (req: any, res: any) => {
 });
 
 // Get recommendation (still mock for now)
-// Keeping `req: any, res: any`
+
 app.get('/get-recommendation', async (req: any, res: any) => {
   try {
     const questionId: any = req.query.questionId;
@@ -152,6 +152,27 @@ app.post('/update-progress-data', async (req: any, res: any) => {
   } catch (error) {
     console.log("Error updating progress data: ", error);
     res.status(500).send('Error updating data');
+  }
+});
+app.get('/student-accuracy', async (req: any, res: any) => {
+  try {
+      const userId: string = req.query.userId as string;
+      const timeframe: 'week' | 'month' = req.query.timeframe as 'week' | 'month';
+
+      if (!userId || !timeframe) {
+          return res.status(400).send('User ID and timeframe are required');
+      }
+
+      const firestoreRes = await firestoreUtils.getStudentAccuracy(userId, timeframe);
+
+      if (firestoreRes.type === 'success') {
+          res.status(200).send(firestoreRes.data);
+      } else {
+          res.status(500).send('Error fetching accuracy: ' + firestoreRes.details);
+      }
+  } catch (error) {
+      console.error('Error fetching student accuracy:', error);
+      res.status(500).send('Internal server error');
   }
 });
 
