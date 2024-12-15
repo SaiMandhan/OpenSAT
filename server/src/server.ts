@@ -13,6 +13,7 @@ app.use(express.json());
 const serviceAccountPath = path.join(__dirname, '../res/serviceAccountKey.json');
 const serviceAccount = require(serviceAccountPath);
 const axios = require('axios');
+import fs from 'fs';
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
@@ -127,6 +128,49 @@ app.get('/get-recommendation', async (req: any, res: any) => {
   }
 });
 
+// Load SAT dataset
+const satDatasetPath = path.join(__dirname, '../src/sat_dataset.json');
+const satDataset = JSON.parse(fs.readFileSync(satDatasetPath, 'utf8'));
+
+
+app.get('/get-random-questions', async (req: any, res: any) => {
+  try {
+    const userId: any = req.query.user_id;
+
+    if (typeof userId !== 'string' || userId === '') {
+      return res.status(400).send('User ID is a required string');
+    }
+
+    const questionResponse: FirestoreUtilResponse = await firestoreUtils.getUserProgress(userId);
+    if (questionResponse.type !== 'success' || !questionResponse.data) {
+      return res.status(500).send('Error fetching user progress: could not get previous questions');
+    }
+
+    const answeredQuestionIds = questionResponse.data.map((q: any) => q.questionId);
+
+    const mathQuestions = satDataset.math.filter((q: any) => !answeredQuestionIds.includes(q.id));
+    const englishQuestions = satDataset.english.filter((q: any) => !answeredQuestionIds.includes(q.id));
+
+    if (!mathQuestions || !englishQuestions) {
+      return res.status(500).send('Error loading questions');
+    }
+
+    const getRandomQuestions = (questions: any[], count: number) => {
+      const shuffled = questions.sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    };
+
+    const randomMathQuestions = getRandomQuestions(mathQuestions, 10);
+    const randomEnglishQuestions = getRandomQuestions(englishQuestions, 10);
+
+    const randomQuestions = [...randomMathQuestions, ...randomEnglishQuestions];
+
+    res.status(200).send(randomQuestions);
+  } catch (error) {
+    console.log("Error getting random questions: ", error);
+    res.status(500).send('Error getting random questions');
+  }
+});
 
 app.post('/update-progress-data', async (req: any, res: any) => {
   try {
