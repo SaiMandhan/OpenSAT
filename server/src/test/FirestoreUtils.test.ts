@@ -9,7 +9,7 @@ import path from 'path';
 
 dotenv.config();
 //comment out when you use env. 
-const serviceAccountPath = path.join(__dirname, '../../serviceAccountKey.json');
+const serviceAccountPath = path.join(__dirname, '../../res/serviceAccountKey.json');
 const serviceAccount = require(serviceAccountPath);
 
 // Initialize Firebase Admin SDK
@@ -17,19 +17,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 const db = admin.firestore();
-
-//comment out when you use env. 
-// const firebaseConfig = {
-//     apiKey: process.env.FIREBASE_API_KEY,
-//     authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-//     projectId: process.env.FIREBASE_PROJECT_ID,
-//     storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-//     messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-//     appId: process.env.FIREBASE_APP_ID
-// };
-
-// const app = initializeApp(firebaseConfig);
-// const db = getFirestore(app);
 
 describe('FirestoreUtils', () => {
     let firestoreUtils: FirestoreUtils;

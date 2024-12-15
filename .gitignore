@@ -4,6 +4,10 @@ tsconfig.json
 dist/
 
 
-# misc
+# secure
 .env
+serviceAccountKey.json
+
+# python
 venv/
+__pycache__/

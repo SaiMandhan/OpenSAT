@@ -10,8 +10,9 @@ const port = 3000;
 app.use(express.json());
 
 // Load service account key
-const serviceAccountPath = path.join(__dirname, '../serviceAccountKey.json');
+const serviceAccountPath = path.join(__dirname, '../res/serviceAccountKey.json');
 const serviceAccount = require(serviceAccountPath);
+const axios = require('axios');
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
@@ -20,24 +21,9 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// const firebaseConfig = {
-//     apiKey: process.env.FIREBASE_API_KEY,
-//     authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-//     projectId: process.env.FIREBASE_PROJECT_ID,
-//     storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-//     messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-//     appId: process.env.FIREBASE_APP_ID
-// };
-
-// const app = initializeApp(firebaseConfig);
-// const db = getFirestore(app);
 // Instantiate FirestoreUtils with the Firestore instance
 const firestoreUtils = new FirestoreUtils(db);
 
-interface RegisterRequestBody {
-  username: string;
-  password: string;
-}
 
 // Register a user (GET request, just like before)
 
@@ -106,14 +92,34 @@ app.get('/get-progress-data', async (req: any, res: any) => {
 
 app.get('/get-recommendation', async (req: any, res: any) => {
   try {
-    const questionId: any = req.query.questionId;
+    const questionId: any = req.query.question_id;
+    const userId: any = req.query.user_id
 
     if (typeof questionId !== 'string' || questionId === '') {
       return res.status(400).send('Question ID is a required string');
+    } else if (typeof userId !== 'string' || userId === '') {
+      return res.status(400).send('User ID is a required string');
     }
 
-    // Still mock data for recommendation
-    const modelResponse: string = '12345678';
+    const questionResponse: FirestoreUtilResponse = await firestoreUtils.getUserProgress(userId);
+    if (questionResponse.type !== 'success' || !questionResponse.data) {
+      return res.status(500).send('Error fetching user progress: could not get previous questions');
+    }
+
+    const response = await axios.post('http://localhost:3001/get-recommendation-from-tensor', {
+      question_id: questionId,
+      prev_questions: questionResponse.data,
+    }, {
+      validateStatus: (status: number) => (status === 200 || status === 400)
+    });
+
+    if (response.status !== 200 && response.data.error === "question not in dataset") {
+      return res.status(404).send('Question ID not found');
+    } else if (response.status !== 200) {
+      return res.status(500).send('Error fetching recommendation');
+    }
+
+    const modelResponse = response.data;
     res.status(200).send({ recommendation: modelResponse });
   } catch (error) {
     console.log("Error getting recommendation: ", error);
@@ -181,4 +187,5 @@ if (require.main === module) {
     console.log(`Server is running on http://localhost:${port}`);
   });
 }
-export default app; 
+
+export default app;
