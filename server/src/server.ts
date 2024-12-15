@@ -12,7 +12,7 @@ app.use(express.json());
 // Load service account key
 const serviceAccountPath = path.join(__dirname, '../res/serviceAccountKey.json');
 const serviceAccount = require(serviceAccountPath);
-const axios = require('axios');
+import axios from 'axios';
 import fs from 'fs';
 
 // Initialize Firebase Admin SDK
@@ -28,36 +28,36 @@ const firestoreUtils = new FirestoreUtils(db);
 
 // Register a user (GET request, just like before)
 
-app.get('/register', async (req: any, res: any) => {
-  try {
-    const username: any = req.query.username;
-    const password: any = req.query.password;
+// app.get('/register', async (req: any, res: any) => {
+//   try {
+//     const username: any = req.query.username;
+//     const password: any = req.query.password;
 
-    if (!username || !password) {
-      return res.status(400).send({ error: 'Username and password are required' });
-    }
+//     if (!username || !password) {
+//       return res.status(400).send({ error: 'Username and password are required' });
+//     }
 
-    // Check if username is taken by querying Firestore
-    const usersRef = db.collection('users');
-    const userSnapshot = await usersRef.where('username', '==', username).get();
+//     // Check if username is taken by querying Firestore
+//     const usersRef = db.collection('users');
+//     const userSnapshot = await usersRef.where('username', '==', username).get();
 
-    if (!userSnapshot.empty) {
-      return res.status(400).send({ error: 'Username is already taken' });
-    }
+//     if (!userSnapshot.empty) {
+//       return res.status(400).send({ error: 'Username is already taken' });
+//     }
 
-    // Username not taken, create new user
-    const newUserRef = usersRef.doc();
-    await newUserRef.set({
-      username,
-      password
-    });
-    console.log("Wrote user to Firestore with ID:", newUserRef.id);
+//     // Username not taken, create new user
+//     const newUserRef = usersRef.doc();
+//     await newUserRef.set({
+//       username,
+//       password
+//     });
+//     console.log("Wrote user to Firestore with ID:", newUserRef.id);
 
-    res.status(201).send({ message: 'Registration successful', userId: newUserRef.id });
-  } catch (error) {
-    res.status(500).send({ error: 'Internal server error' });
-  }
-});
+//     res.status(201).send({ message: 'Registration successful', userId: newUserRef.id });
+//   } catch (error) {
+//     res.status(500).send({ error: 'Internal server error' });
+//   }
+// });
 
 // Get progress data
 
@@ -204,7 +204,7 @@ app.post('/update-progress-data', async (req: any, res: any) => {
     res.status(500).send('Error updating data');
   }
 });
-app.get('/student-accuracy', async (req: any, res: any) => {
+app.get('/get-student-accuracy', async (req: any, res: any) => {
   try {
       const userId: string = req.query.userId as string;
       const timeframe: 'week' | 'month' = req.query.timeframe as 'week' | 'month';
