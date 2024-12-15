@@ -121,7 +121,15 @@ app.get('/get-recommendation', async (req: any, res: any) => {
     }
 
     const modelResponse = response.data;
-    res.status(200).send({ recommendation: modelResponse });
+    const recommendations = modelResponse.recommendation.map((rec: any) => {
+      const question = satDataset.math.find((q: any) => q.id === rec.id) || satDataset.english.find((q: any) => q.id === rec.id);
+      return {
+      ...rec,
+      question: question ? question : null
+      };
+    });
+
+    res.status(200).send({ recommendation: recommendations });
   } catch (error) {
     console.log("Error getting recommendation: ", error);
     res.status(500).send('Error fetching data');
