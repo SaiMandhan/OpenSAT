@@ -18,7 +18,7 @@ def recommend_questions(question_id, prev_questions, top_n=3):
     query_embedding = question_embeddings[question_id]
     similarities = {}
     
-    prev_question_ids = set(prev_questions.keys())
+    prev_question_ids = {q['questionId'] for q in prev_questions}
     for q_id, embedding in question_embeddings.items():
         if q_id != question_id and q_id not in prev_question_ids:
             similarity = float(cosine_similarity(query_embedding, embedding)[0][0])
@@ -45,8 +45,9 @@ def recommend():
         return jsonify({"error": "question_id is required"}), 400
     if not prev_questions:
         return jsonify({"error": "prev_questions is required"}), 400
-    if not isinstance(prev_questions, dict):
-        print(prev_questions)
+    
+    if not isinstance(prev_questions, list):
+        print(len(prev_questions))
         return jsonify({"error": "prev_questions must be a list"}), 400
     
     recommendations = recommend_questions(question_id, prev_questions, top_n)

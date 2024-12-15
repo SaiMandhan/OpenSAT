@@ -116,7 +116,7 @@ app.get('/get-recommendation', async (req: any, res: any) => {
     if (response.status !== 200 && response.data.error === "question not in dataset") {
       return res.status(404).send('Question ID not found');
     } else if (response.status !== 200) {
-      return res.status(500).send('Error fetching recommendation');
+      return res.status(500).send('Error fetching recommendation: ' + response.data.error);
     }
 
     const modelResponse = response.data;
