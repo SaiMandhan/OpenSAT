@@ -78,4 +78,10 @@ describe('FirestoreUtils', () => {
         expect(response.data).toEqual([]); // Ensure no progress is returned
         expect(response.details).toBe('User progress retrieved successfully');
     });
+    //get accuracy
+    test('should return 0% accuracy if user has no questions in timeframe', async () => {
+        const response = await firestoreUtils.getStudentAccuracy('userNoQuestions', 'week');
+        expect(response.type).toBe('success');
+        expect(response.data).toHaveProperty('averageAccuracy', 0);
+      });
 });
