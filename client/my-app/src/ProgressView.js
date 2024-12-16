@@ -13,7 +13,7 @@ const ProgressView = ({ userId }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Fetch user progress
+
         const progressResponse = await getUserProgress(userId);
         if (progressResponse.type === 'success') {
           const questions = progressResponse.data;
@@ -25,13 +25,13 @@ const ProgressView = ({ userId }) => {
           });
         }
 
-        // Fetch weekly accuracy
+
         const weeklyResponse = await getAccuracy(userId, 'week');
         if (weeklyResponse.type === 'success') {
           setWeeklyAccuracy(weeklyResponse.data.averageAccuracy);
         }
 
-        // Fetch monthly accuracy
+
         const monthlyResponse = await getAccuracy(userId, 'month');
         if (monthlyResponse.type === 'success') {
           setMonthlyAccuracy(monthlyResponse.data.averageAccuracy);
@@ -59,8 +59,8 @@ const ProgressView = ({ userId }) => {
   const motivationalMessage = getMotivationalMessage(parseFloat(accuracy));
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex justify-center items-center p-4">
-      <div className="bg-white/10 rounded-xl p-8 backdrop-blur-lg w-full max-w-md shadow-xl">
+    <div className="min-h-screen bg-blue-500 flex justify-center items-center p-4">
+      <div className="bg-white/10 rounded-xl p-8 r-purple-500 g w-full max-w-md shadow-xl">
         <h1 className="text-2xl font-bold text-white mb-6">
           Performance Metrics
         </h1>
