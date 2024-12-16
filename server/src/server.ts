@@ -1,4 +1,3 @@
-import { ClerkExpressWithAuth, requireAuth } from "@clerk/clerk-sdk-node";
 import express from 'express';
 import * as admin from 'firebase-admin';
 import { FirestoreUtils, FirestoreUtilResponse } from './FirestoreUtils';
@@ -9,7 +8,6 @@ const port = 3000;
 
 // Parse JSON body (for POST requests)
 app.use(express.json());
-app.use(ClerkExpressWithAuth());
 
 // Load service account key
 const serviceAccountPath = path.join(__dirname, '../res/serviceAccountKey.json');
@@ -60,34 +58,6 @@ const firestoreUtils = new FirestoreUtils(db);
 //     res.status(500).send({ error: 'Internal server error' });
 //   }
 // });
-// set user type:
-app.post('/set-user-type', requireAuth(), async (req: any, res: any) => {
-  try {
-    const userType: any = req.query.userType;
-    const userId: any = req.query.userId;
-
-    // Check that the user making this request is the same user or has permissions.
-    // Since we used `requireAuth()`, we know req.auth exists.
-    // This ensures that only the authenticated user can set their own type.
-    if (req.auth.userId !== userId) {
-      return res.status(403).send('Not authorized to set user type for this user');
-    }
-
-    const allowedTypes = ['student', 'tutor', 'parent'];
-    if (!allowedTypes.includes(userType)) {
-      return res.status(400).send('Invalid user type');
-    }
-
-    // Update the user in Firestore
-    const userRef = db.collection('users').doc(userId);
-    await userRef.update({ userType });
-
-    res.status(200).send(`User type updated to ${userType}`);
-  } catch (error) {
-    console.error('Error setting user type:', error);
-    res.status(500).send('Internal Server Error');
-  }
-});
 
 // Get progress data
 
@@ -120,10 +90,11 @@ app.get('/get-progress-data', async (req: any, res: any) => {
 });
 
 // Get recommendation (still mock for now)
+
 app.get('/get-recommendation', async (req: any, res: any) => {
   try {
     const questionId: any = req.query.question_id;
-    const userId: any = req.query.user_id;
+    const userId: any = req.query.user_id
 
     if (typeof questionId !== 'string' || questionId === '') {
       return res.status(400).send('Question ID is a required string');
@@ -136,7 +107,7 @@ app.get('/get-recommendation', async (req: any, res: any) => {
       return res.status(500).send('Error fetching user progress: could not get previous questions');
     }
 
-    const response = await axios.post('http://127.0.0.1:3001/get-recommendation-from-tensor', {
+    const response = await axios.post('http://localhost:3001/get-recommendation-from-tensor', {
       question_id: questionId,
       prev_questions: questionResponse.data,
     }, {
@@ -148,15 +119,13 @@ app.get('/get-recommendation', async (req: any, res: any) => {
     } else if (response.status !== 200) {
       return res.status(500).send('Error fetching recommendation: ' + response.data.error);
     }
+
     const modelResponse = response.data;
     const recommendations = modelResponse.recommendation.map((rec: any) => {
-    // my version of code
-    //const modelResponse = response.data; // modelResponse is an array of recommendations
-    //const recommendations = modelResponse.map((rec: any) => {
       const question = satDataset.math.find((q: any) => q.id === rec.id) || satDataset.english.find((q: any) => q.id === rec.id);
       return {
-        ...rec,
-        question: question ? question : null
+      ...rec,
+      question: question ? question : null
       };
     });
 
@@ -166,7 +135,6 @@ app.get('/get-recommendation', async (req: any, res: any) => {
     res.status(500).send('Error fetching data');
   }
 });
-
 
 // Load SAT dataset
 const satDatasetPath = path.join(__dirname, '../src/sat_dataset.json');
