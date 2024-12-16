@@ -1,5 +1,5 @@
 const API_URL = 'http://localhost:3001';
-const FIREBASE_API_URL = '/api/firebase'; // Adjust based on your backend setup
+const FIREBASE_API_URL = '/api/firebase';
 
 export const getRecommendations = async (questionId, prevQuestions, topN = 3) => {
   try {

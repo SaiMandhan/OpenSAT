@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
+import { SignIn, useUser } from '@clerk/clerk-react';
 import QuestionView from './QuestionView';
 import ProgressView from './ProgressView';
 
 function App() {
-  const [view, setView] = useState('question'); 
-  const userId = "test-user-123"; 
-  const currentQuestionId = "281a4f3b";
+  const [view, setView] = useState('question');
+  const { isSignedIn, user } = useUser();
+  
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 flex items-center justify-center">
+        <SignIn />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600">
@@ -20,9 +28,9 @@ function App() {
         </div>
         
         {view === 'question' ? (
-          <QuestionView userId={userId} currentQuestionId={currentQuestionId} />
+          <QuestionView userId={user.id} currentQuestionId="281a4f3b" />
         ) : (
-          <ProgressView userId={userId} />
+          <ProgressView userId={user.id} />
         )}
       </div>
     </div>
