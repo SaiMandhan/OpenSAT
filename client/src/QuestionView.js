@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle } from 'lucide-react';
-import { getRecommendations, updateProgress } from './apiUtils';
+import React, { useState } from 'react';
+import {CheckCircle, XCircle} from 'lucide-react';
 
-const QuestionView = ({ userId, currentQuestionId }) => {
-  const [questionData, setQuestionData] = useState({
+const QuestionView = () => {
+
+  const questionData = {
     question: "Solve for X: 3x + 5 = 20?",
     choices: [
       { id: 1, text: "5", isCorrect: true },
@@ -12,50 +12,16 @@ const QuestionView = ({ userId, currentQuestionId }) => {
       { id: 4, text: "6", isCorrect: false }
     ],
     explanation: "Insert explanation text here"
-  });
+  };
 
   const [selectedChoice, setSelectedChoice] = useState(null);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [recommendedQuestions, setRecommendedQuestions] = useState([]);
-  const [prevQuestions, setPrevQuestions] = useState([]);
 
-  useEffect(() => {
-    const fetchRecommendations = async () => {
-      try {
-        const recommendations = await getRecommendations(currentQuestionId, prevQuestions);
-        setRecommendedQuestions(recommendations);
-      } catch (error) {
-        console.error('Error fetching recommendations:', error);
-      }
-    };
-
-    if (currentQuestionId) {
-      fetchRecommendations();
-    }
-  }, [currentQuestionId, prevQuestions]);
-
-  const handleChoiceClick = async (choice) => {
+  const handleChoiceClick = (choice) => {
     setSelectedChoice(choice);
     
     if (!choice.isCorrect) {
       setShowExplanation(true);
-    }
-
-    try {
-      await updateProgress(
-        userId,
-        currentQuestionId,
-        questionData.choices.find(c => c.isCorrect).text,
-        choice.text,
-        choice.isCorrect
-      );
-
-      setPrevQuestions(prev => [...prev, {
-        questionId: currentQuestionId,
-        correct: choice.isCorrect
-      }]);
-    } catch (error) {
-      console.error('Error updating progress:', error);
     }
   };
 
@@ -76,7 +42,7 @@ const QuestionView = ({ userId, currentQuestionId }) => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full p-8 space-y-6">
         <div className="text-2xl font-bold text-gray-800 mb-4">
-          Practice Question
+          Practise Question
         </div>
         
         <div className="text-xl font-semibold text-gray-700 mb-6">
@@ -121,22 +87,6 @@ const QuestionView = ({ userId, currentQuestionId }) => {
           >
             {showExplanation ? 'Hide Explanation' : 'View Explanation'}
           </button>
-        )}
-
-        {recommendedQuestions.length > 0 && selectedChoice && (
-          <div className="mt-6">
-            <h3 className="font-bold text-gray-800 mb-3">Recommended Questions:</h3>
-            <div className="space-y-2">
-              {recommendedQuestions.map((rec) => (
-                <div key={rec.id} className="p-3 bg-blue-50 rounded-lg">
-                  <span className="font-medium">Question {rec.id}</span>
-                  <span className="text-sm text-gray-600 ml-2">
-                    (Similarity: {(rec.similarity * 100).toFixed(1)}%)
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
       </div>
     </div>
